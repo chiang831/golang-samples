@@ -146,10 +146,25 @@ func logoutHandler(w http.ResponseWriter, r *http.Request) *appError {
 	if err != nil {
 		return appErrorf(err, "could not get default session: %v", err)
 	}
+
+	// Execute HTTP GET request to revoke current token
+	tok, ok := session.Values[oauthTokenSessionKey].(*oauth2.Token)
+	if !ok || !tok.Valid() {
+		return appErrorf(err, "Token not available", err)
+	}
+	url := "https://accounts.google.com/o/oauth2/revoke?token=" + tok.AccessToken
+	resp, err := http.Get(url)
+	if err != nil {
+		return appErrorf(err, "Faild to revoke token", err)
+	}
+	defer resp.Body.Close()
+
 	session.Options.MaxAge = -1 // Clear session.
+	session.Values[oauthTokenSessionKey] = nil
 	if err := session.Save(r, w); err != nil {
 		return appErrorf(err, "could not save session: %v", err)
 	}
+
 	redirectURL := r.FormValue("redirect")
 	if redirectURL == "" {
 		redirectURL = "/"
