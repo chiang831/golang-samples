@@ -3,4 +3,5 @@ env: flex
 api_version: 1
 
 env_variables:
-  OAUTH2_CALLBACK: https://<your-project-id>.appspot.com/oauth2callback
+  OAUTH2_CALLBACK: https://elo-site-162707.appspot.com/oauth2callback
+
